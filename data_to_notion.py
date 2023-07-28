@@ -1,25 +1,14 @@
 '''
-<<<<<<< HEAD
 The purpose of the file is to know whether the notion database is empty.If so, just insert data into it. 
 Otherwise,update new pages and delete the rest of existing pages in the notion.
 Since each job opening is one page, the first step is to query the parent page of all the pages to get the page id of each page.
 Then updating/deleting can be finished by using each page id.
 '''
-=======
-The purpose of the file is to update new pages and delete the rest of existing pages in the notion.
-Since each opening is one page, the first step is to query the parent page of all the pages to get the page id of each page.
-Then updating/deleting can be finished by using each page id.
-'''
-
-import requests
-import json
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
 
 import requests
 import json
 import secret_data as sd 
 
-import secret_data as sd 
 
 database_id = sd.Database_id
 api_key = sd.notion_api_key
@@ -31,7 +20,6 @@ headers = {
     "Notion-Version": "2022-06-28"
 }
 
-<<<<<<< HEAD
 #, data=json.dumps(payload)
 #send the API request with the prepared payload and headers 
 response = requests.post(endpoint, headers=headers) 
@@ -46,23 +34,10 @@ if response.status_code == 200:
         response = requests.post(endpoint, headers=headers, json={"start_cursor": next_cursor})
         data = response.json()
         existing_pages.extend(data.get("results", []))
-=======
-
-payload = {}
-
-#send the API request with the prepared payload and headers (json.dumps() : Serialize obj to a JSON formatted str)
-response = requests.post(endpoint, headers=headers, data=json.dumps(payload)) 
-
-if response.status_code == 200:
-    data = response.json()  #type : dict
-    existing_pages = data.get("results", [])
-    empty = len(existing_pages) == 0
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
     
 else:
     print("Failed to retrieve existing pages. Status code:", response.status_code)
 
-<<<<<<< HEAD
 #check if the notion database is empty or not
 def is_empty():
     if len(existing_pages)==0:      
@@ -73,16 +48,6 @@ def is_empty():
 #return data that was scraped from 104 and CakeResume 
 def all_data(sc: dict):
     if sc['date'] == "":  #openings in CakeResume doesn't comtain date information directly 
-=======
-def is_empty():
-    if not empty:      
-        return False
-    else:
-        return True
-
-def all_data(sc: dict):
-    if sc['date'] == "":
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
         #date_str = json.dumps(None)
         #print(date_str)
         dn = {
@@ -113,10 +78,6 @@ def all_data(sc: dict):
 #update page 
 def update_page(url: str, new_data: dict):
     payload = {"properties": new_data}
-<<<<<<< HEAD
-=======
-    #payload = new_data
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
 
     res = requests.patch(url, json=payload, headers=headers)
 
@@ -149,10 +110,7 @@ def insert_data(scraped:list):
         data = {"parent": {"database_id": database_id},
                 "properties": all_data(scraped[i])}
         
-<<<<<<< HEAD
         #json.dumps() : Serialize obj to a JSON formatted str 序列化(以位元形式，電腦看得懂的方式)寫入JSON 格式的資料
-=======
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
         res = requests.post(endpoint, headers=headers, data=json.dumps(data)) 
 
         if res.status_code == 200:
@@ -190,16 +148,8 @@ def patch_pg(scraped:list):
 
 
     print("update : ",count_update)
-<<<<<<< HEAD
     print("delete : ",count_delete)    
 
 
 if __name__ == '__main__':
     patch_pg(existing_pages)
-=======
-    print("selete : ",count_delete)    
-
-
-if __name__ == '__main__':
-    patch_pg(existing_pages)
->>>>>>> 7ac4cc895c3e8a9d724a2ebf7bcf3a9a2e8c773f
