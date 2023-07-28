@@ -9,7 +9,7 @@ intern_info={}
 
 driver = webdriver.Chrome("C:/Users/88691/Downloads/chromedriver_win32/chromedriver.exe")
 
-#return total pages(104)
+#return total pages of 104
 def total_page():
     class_element = driver.find_element(By.CLASS_NAME,"gtm-paging-top")
     option_elements = class_element.find_elements(By.CSS_SELECTOR,"option")
@@ -34,7 +34,7 @@ def next_page():
     class_element = driver.find_elements(By.CLASS_NAME,"Pagination_itemNavigation__wHk0M")
     class_element[1].click()
 
-#find the title name of the company
+#find the title name according to the company name
 def FindTitle(dicts:dict,company:str):
     for job in dicts:
         if("股份有限公司" in job['company']):
@@ -55,11 +55,11 @@ def jaccard_similarity(word1, word2):
 
 
 def main():
-    #scrape data in CakeResume
+    #scrape data from CakeResume
     driver.get("https://www.cakeresume.com/jobs?profession%5B0%5D=it&job_type%5B0%5D=internship&order=latest")
     time.sleep(5)
 
-    #updated time from new to old
+    #click the button which lets the updated time be sorted from new to old
     bar = driver.find_elements(By.CLASS_NAME,'DropdownButton_button__lWImA')
     bar[12].click()
     newest = driver.find_elements(By.CLASS_NAME,'InstantSearchSortBy_name__tTVDl')
@@ -67,7 +67,7 @@ def main():
     time.sleep(5)
 
     sum=10
-    companies=[]
+    companies=[] #store companies in CakeResume to skip the same openings in 104 later
     while(sum==10):
         upload_cake = driver.find_elements(By.CLASS_NAME,"fa-clock") 
         sum = 0
@@ -75,7 +75,7 @@ def main():
         for i in upload_cake:
             time_cake = i.find_element(By.XPATH,"..").find_element(By.XPATH,"..")
             if "天" in time_cake.text:
-                s = [int(s) for s in re.findall(r'\d+', time_cake.text)]  #regular expression, \d means number, and '+' means a set of number
+                s = [int(s) for s in re.findall(r'\d+', time_cake.text)]  #regular expression, \d means number, and '\d+' means a set of number
                 if(s[0]<=14):
                     sum+=1
             else:
@@ -90,7 +90,7 @@ def main():
 
                 try:
                     salaries_cake = wrapper[job].find_element(By.CLASS_NAME,"fa-dollar-sign")
-                    salary_cake = salaries_cake.find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..") #to its parent class   
+                    salary_cake = salaries_cake.find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..") #its parent class   
                     salary_text= salary_cake.text.strip()
                 except:
                     salary_text=""
@@ -118,8 +118,8 @@ def main():
                                        'url':href_cake}                                 #detail url
                 
 
-                if('股份有限公司' in (companies_cake.text)):
-                    companies.append(companies_cake.text.replace('股份有限公司','').strip()) 
+                if('股份有限公司' in (companies_cake.text)): 
+                    companies.append(companies_cake.text.replace('股份有限公司','').strip()) #to increase similarity
                 else:
                     companies.append(companies_cake.text.strip())
                 
@@ -143,7 +143,7 @@ def main():
 
 
     for x in range (1,total_page()):        #n pages in total, need to scroll for n-1 time(s) (no need for first page)
-        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")  #滾動卷軸
+        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")  #scroll the page
         time.sleep(3)
 
     dates = driver.find_elements(By.CLASS_NAME,"b-tit__date")
@@ -158,7 +158,7 @@ def main():
         if '元' in i.text or '待遇' in i.text:
             salaries104_processed.append(i.text)
 
-    companies104 = driver.find_elements(By.CSS_SELECTOR,".b-list-inline a")  #all a tags in class named b-list-inline
+    companies104 = driver.find_elements(By.CSS_SELECTOR,".b-list-inline a")  #all 'a' tags in class named b-list-inline
 
     places104 = driver.find_elements(By.CSS_SELECTOR,".job-list-intro li:first-child")  ## Find the first "li" element within the specified class
     places104_processed = places104[3:]
@@ -182,7 +182,7 @@ def main():
             if("股份有限公司" in companies104[i].text):
                 com = companies104[i].text.replace("股份有限公司","").strip()
             else:
-                com = companies104[i].text.strip() #104
+                com = companies104[i].text.strip() 
 
             simi = 0
             
@@ -192,7 +192,7 @@ def main():
                     simi = jaccard_similarity(com,j)
                     name = j
 
-            #the similarity of companies and the title of these two openings are the same, so these two are regarded as the same opening -> skip this one in 104
+            #the two companie names is similar and the title of these two openings are the same, so these two are regarded as the same opening -> skip this one in 104
             if(simi>0.4 and FindTitle(dicts,name) == titles_104[i].text):   
                 print(FindTitle(dicts,name))
                 continue
@@ -207,10 +207,10 @@ def main():
                                 'url':hrefs104[i].get_attribute("href")}  #detail url
             
                 count104+=1
-                #print(companies)
-                dicts.append(intern104_info) 
+                dicts.append(intern104_info)
+                 
     print("count104 : ",count104)     
-    #driver.quit()
+    driver.quit()
     return dicts
 
 if __name__ == '__main__': #如果以主程式執行
