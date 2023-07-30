@@ -7,12 +7,6 @@ database_id=sd.Database_id
 api_key = sd.notion_api_key
 
 
-'''headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
-}'''
-
 scraped = main()
 
 if not is_empty():      
