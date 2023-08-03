@@ -20,7 +20,6 @@ headers = {
     "Notion-Version": "2022-06-28"
 }
 
-#, data=json.dumps(payload)
 #send the API request with the prepared payload and headers 
 response = requests.post(endpoint, headers=headers) 
 
@@ -48,8 +47,6 @@ def is_empty():
 #return data that was scraped from 104 and CakeResume 
 def all_data(sc: dict):
     if sc['date'] == "":  #openings in CakeResume doesn't comtain date information directly 
-        #date_str = json.dumps(None)
-        #print(date_str)
         dn = {
             "Date": {"date":None},
             "Job Title": {"title": [{"text": {"content": sc['title']}}]},
@@ -66,13 +63,7 @@ def all_data(sc: dict):
             "Salary": {"rich_text": [{"text": {"content": sc['salary']}}]},
             "URL":{"url": sc['url']}}
     
-    # Check if the 'date' key has a value
-    #if sc["date"]:
-        # If it has a value, convert it to a proper date format before inserting
-        #dn["date"] = 
-    #else:
-        #dn["Date"] = date_str
-    #print(dn)
+   
     return dn
 
 #update page 
