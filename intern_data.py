@@ -123,7 +123,7 @@ def main():
                 else:
                     companies.append(companies_cake.text.strip())
                 
-                #print(internCake_info)
+            
                 dicts.append(internCake_info)
 
             next_page()
