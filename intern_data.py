@@ -216,7 +216,3 @@ def main():
 if __name__ == '__main__': #如果以主程式執行
    print(main())
 
-
-
-
-#data.to_excel('sample_data.xlsx', sheet_name='sheet1', index=False)  #export data to excel
