@@ -3,7 +3,7 @@ Collect information about job openings from job boards and integrate all the dat
 
 ## how it works
 ### collect data(intern_data.py)  
-Use Selenium WebDriver to scrape data from job boards, like 104 and CakeResume. Exclude some openings that do not match the job you are searching for.
+Use Selenium WebDriver to scrape data from job boards, like 104 and Yourator. Exclude some openings that do not match the job you are searching for.
 ### insert data into the Notion database(data_to_notion.py)  
 Insert data to Notion through Notion API. 
 
