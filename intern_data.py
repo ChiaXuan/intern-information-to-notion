@@ -6,8 +6,9 @@ from selenium.webdriver.common.by import By
 
 dicts=[]
 intern_info={}
+companies=[]
 
-driver = webdriver.Chrome("C:/Users/88691/Downloads/chromedriver_win32/chromedriver.exe")
+driver = webdriver.Chrome("C:/Users/88691/Downloads/chromedriver-win64/chromedriver.exe")
 
 #return total pages of 104
 def total_page():
@@ -31,7 +32,7 @@ def within_14_days(date):
 
 #click next page button in CakeResume
 def next_page():
-    class_element = driver.find_elements(By.CLASS_NAME,"Pagination_itemNavigation__wHk0M")
+    class_element = driver.find_elements(By.CLASS_NAME,"Pagination_itemNavigation__Cv3M8")
     class_element[1].click()
 
 #find the title name according to the company name
@@ -55,82 +56,50 @@ def jaccard_similarity(word1, word2):
 
 
 def main():
-    #scrape data from CakeResume
-    driver.get("https://www.cakeresume.com/jobs?profession%5B0%5D=it&job_type%5B0%5D=internship&order=latest")
+    #scrape data from yourator
+    driver.get("https://www.yourator.co/jobs?category[]=%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B&category[]=%E5%BE%8C%E7%AB%AF%E5%B7%A5%E7%A8%8B&category[]=%E5%85%A8%E7%AB%AF%E5%B7%A5%E7%A8%8B&category[]=%E8%A1%8C%E5%8B%95%E8%A3%9D%E7%BD%AE%E9%96%8B%E7%99%BC&category[]=%E9%81%8A%E6%88%B2%E9%96%8B%E7%99%BC&category[]=%E6%B8%AC%E8%A9%A6%E5%B7%A5%E7%A8%8B&category[]=DevOps%20%2F%20SRE&category[]=%E8%B3%87%E6%96%99%E5%B7%A5%E7%A8%8B%20%2F%20%E6%A9%9F%E5%99%A8%E5%AD%B8%E7%BF%92&category[]=MIS%20%2F%20%E7%B6%B2%E8%B7%AF%E7%AE%A1%E7%90%86&position[]=intern")
+    time.sleep(5)
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(5)
 
-    #click the button which lets the updated time be sorted from new to old
-    bar = driver.find_elements(By.CLASS_NAME,'DropdownButton_button__lWImA')
-    bar[12].click()
-    newest = driver.find_elements(By.CLASS_NAME,'InstantSearchSortBy_name__tTVDl')
-    newest[1].click()
-    time.sleep(5)
+    cols = driver.find_elements(By.CLASS_NAME,"flex.overflow-hidden")
 
-    sum=10
-    companies=[] #store companies in CakeResume to skip the same openings in 104 later
-    while(sum==10):
-        upload_cake = driver.find_elements(By.CLASS_NAME,"fa-clock") 
-        sum = 0
+    for col in cols:
         
-        for i in upload_cake:
-            time_cake = i.find_element(By.XPATH,"..").find_element(By.XPATH,"..")
-            if "天" in time_cake.text:
-                s = [int(s) for s in re.findall(r'\d+', time_cake.text)]  #regular expression, \d means number, and '\d+' means a set of number
-                if(s[0]<=14):
-                    sum+=1
+        inline = col.find_elements(By.CLASS_NAME,'flex.shrink')
+
+        t = inline[1].find_element(By.TAG_NAME,"span")
+        if "月" not in t.text:
+            title = col.find_element(By.CLASS_NAME,'flex-initial.mb-1')
+            
+            company = col.find_element(By.CLASS_NAME,'flex-initial.text-sub')
+            
+            # find <a>
+            a_element = col.find_element(By.XPATH,"..")
+            href = a_element.get_attribute("href")
+            
+            place = inline[0].find_element(By.TAG_NAME,"span")
+            salary = inline[2].find_element(By.TAG_NAME,"span")
+
+            internCake_info = {'date':"",                               #last updated date 
+                            'title':title.text.strip(),                 #title
+                            'salary':salary.text.strip(),               #salary
+                            'company':company.text.strip(),             #company name
+                            'place':place.text.strip(),                 #place
+                            'url':href}      
+            
+            if('股份有限公司' in (company.text)): 
+                    companies.append(company.text.replace('股份有限公司','').strip()) #to increase similarity
             else:
-                sum+=1
-            
-        if(sum!=0):
-        
-            wrapper = driver.find_elements(By.CLASS_NAME,"JobSearchItem_content__TKBfA") 
-        
-            for job in range(sum):
-                title_cake = wrapper[job].find_element(By.CLASS_NAME,"JobSearchItem_jobTitle__Fjzv2") 
+                    companies.append(company.text.strip())
 
-                try:
-                    salaries_cake = wrapper[job].find_element(By.CLASS_NAME,"fa-dollar-sign")
-                    salary_cake = salaries_cake.find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..").find_element(By.XPATH,"..") #its parent class   
-                    salary_text= salary_cake.text.strip()
-                except:
-                    salary_text=""
-
-
-                companies_cake = wrapper[job].find_element(By.CLASS_NAME,"JobSearchItem_companyName__QKkj5")
-           
-            
-                try:
-                    places_cake = wrapper[job].find_element(By.CSS_SELECTOR,".JobSearchItem_featureSegments__I1Csc span")
-                    place_cake = places_cake.text.strip()
-                except:
-                    place_cake = ""
+            dicts.append(internCake_info)
     
 
-                hrefs_cake = wrapper[job].find_element(By.CLASS_NAME ,"JobSearchItem_jobTitle__Fjzv2")
-                href_cake = hrefs_cake.get_attribute("href").strip()
-           
-                if("資安" not in title_cake.text.strip()):
-                    internCake_info = {'date':"",                                       #last updated date 
-                                       'title':title_cake.text.strip(),                 #title
-                                       'salary':salary_text,                            #salary
-                                       'company':companies_cake.text.strip(),           #company name
-                                       'place':place_cake,                              #place
-                                       'url':href_cake}                                 #detail url
-                
-
-                if('股份有限公司' in (companies_cake.text)): 
-                    companies.append(companies_cake.text.replace('股份有限公司','').strip()) #to increase similarity
-                else:
-                    companies.append(companies_cake.text.strip())
-                
-            
-                dicts.append(internCake_info)
-
-            next_page()
-            time.sleep(5)
-    print("countcake:",len(dicts))
     
-    #scrape data in 104
+
+    #scrape 
+    # data in 104
     driver.get("https://www.104.com.tw/jobs/search/?ro=2&jobcat=2007001000%2C2007002000&isnew=14&kwop=7&expansionType=area%2Cspec%2Ccom%2Cjob%2Cwf%2Cwktm&order=12&asc=0&page=1&mode=s&jobsource=student2020&langFlag=0&langStatus=0&recommendJob=1&hotJob=1")
 
     driver.implicitly_wait(10)
@@ -197,7 +166,7 @@ def main():
                 print(FindTitle(dicts,name))
                 continue
             
-            if (('論件計酬' not in salaries104_processed[i]) and ('資安' not in titles_104[i].text)):
+            if (('論件計酬' not in salaries104_processed[i]) and ('資安' not in titles_104[i].text) and ('韌體' not in titles_104[i].text)):
             
                 intern104_info = {'date':date_only,                       #last updated date 
                                 'title':titles_104[i].text,                #title
@@ -215,4 +184,3 @@ def main():
 
 if __name__ == '__main__': #如果以主程式執行
    print(main())
-
